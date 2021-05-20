@@ -1,10 +1,13 @@
-//Here we create a HashMap with takes in two generic variables, T as the key
+//NAME: ABHISHEK AMOL MISHRA AND NETID: AAM190011
+//Here we create a GenericHashMap with takes in two generic variables, T as the key
 //K for the value
-public class HashMap<T, K> {
+public class GenericHashMap<T, K> {
 	/*Here we create our field variables for our hash map:
 	 * - The size variable holds the size of our hash map
+	 * - The loadFactor variable holds the load size so that we know when to resize
 	 * - The bucket variable holds the amount of new elements we add to our hash map*/
-	private int size = 4;
+	private int size = 11;
+	private double loadFactor = 0.5;
 	private int bucket = 0;
 	
 	/*Here we have an array called hashMap that will hold an array of Buckets
@@ -13,7 +16,7 @@ public class HashMap<T, K> {
 	private Bucket<T, K>[] hashMap = (Bucket<T, K>[]) new Bucket<?,?>[size];
 	
 	//Here we have an inner class called Bucket that will
-	//store the key - T - and value - K - passed in by the HashMap.
+	//store the key - T - and value - K - passed in by the GenericHashMap.
 	//This bucket class allows us to hold the key and value as on object
 	//allowing us to make a more fluid and easy-to-use hash map.
 	static class Bucket<T, K>{
@@ -41,10 +44,6 @@ public class HashMap<T, K> {
 		}
 	}
 	
-	public HashMap(int size) {
-		this.size=size;
-	}
-	
 	//Here is our implemented put function for our hashmap. It takes 
 	//in a key of type T and a value of type K.
 	public void put(T key, K data) {
@@ -57,6 +56,17 @@ public class HashMap<T, K> {
 		//we have an added a new element into our hashmap
 		bucket++;
 		
+		//We calculate our load ratio by dividing the num. of elements by the size
+		double load = (double)bucket/(double)size;
+		
+		//If the load is bigger than or equal to the loadfactor, then we need to resize and rehash
+		if(load >= loadFactor) {
+			//We call the resize function and return an array of Bucket<T,K> in essence
+			//making a new array and setting hashMap to this new, bigger, rehashed array
+			hashMap = this.resize();
+			//Finally, we store the length of the hashMap in the size variable
+			size = hashMap.length;
+		}
 	}
 	
 	//Here we have our hashMap's get function which gets the K object from the T Key passed in
@@ -86,8 +96,7 @@ public class HashMap<T, K> {
 				if(hashMap[hashCode].getKey().equals(key)) {
 					//We make result equal to the object stored at the hashcode index in the hashmap
 					result = hashMap[hashCode];
-					hashMap[hashCode] = null;
-					bucket--;
+					
 					//we set cont to false because we've found what we wanted to find and no
 					//longer need to look
 					cont = false;
@@ -167,11 +176,58 @@ public class HashMap<T, K> {
 		}
 	}
 	
-	public boolean isFull() {
-		if(bucket == size) {
-			return true;
+	private Bucket<T, K>[] resize() {
+		//In this resize function, we first
+		//call the nextPrime() that gets the next
+		//highest prime number from our current size.
+		int newSize = this.nextPrime();
+		
+		//Here we create a new hash map array with our new size that we got from the 
+		//nextPrime function
+		Bucket<T, K>[] newGenericHashMap = (Bucket<T, K>[]) new Bucket<?,?>[newSize];
+		
+		//We make a counter variable called probe that will
+		//increment through our original hash map, get the object and then
+		//we will put that object into our new array - in essence rehashing it
+		int probe = 0;
+		while(probe < hashMap.length) {
+			//While our probe is less than the original hash map's length,
+			//we access that location and if it is not null,
+			//we get the Bucket in that location in the array.
+			if(hashMap[probe] != null) {
+				Bucket<T,K> data = hashMap[probe];
+				
+				//Finally, we recall the hashing function with the
+				//new hashmap and the bucket we got from our original
+				//hashmap
+				hashing(newGenericHashMap, data.getKey(), data.getValue());
+			}
+			
+			//We increase the probe variable to access the elements
+			//of the hashmap
+			probe++;
 		}
-		return false;
+		
+		//Finally, we return the new hashmap 
+		return newGenericHashMap;
+	}
+	
+	private int nextPrime() {
+		//In the nextPrime function, we first
+		//double our current size and then
+		//we start finding the next prime number from that 
+		//size
+		int newSize=size*2;
+		while(newSize%2==0) {
+			//While we have an even number, we 
+			//will add one. This will eventually
+			//lead us to an odd number - stopping the
+			//loop and getting to our next prime number
+			newSize++;
+		}
+		
+		//finally, we return this new size for our new array
+		return newSize;
 	}
 }
 

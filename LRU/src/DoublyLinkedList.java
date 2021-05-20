@@ -63,15 +63,26 @@ public class DoublyLinkedList {
 		//beginning of the list. Here, we get the previous and afterward node from the Node
 		//we want move. We accordingly update the connections and then
 		//using the enqueue function, we set the node to the head of the linked list.
-		Node before = toMove.getPrev();
-		Node after = toMove.getNext();
-		
-		before.setNext(toMove.getNext());
-		after.setPrev(toMove.getPrev());
-		
-		toMove.setNext(null);
-		toMove.setPrev(null);
-		
-		this.enqueue(toMove);
+		if(toMove != head) {
+			Node before = toMove.getPrev();
+			Node after = toMove.getNext();
+			
+			if(before != null) {
+				before.setNext(toMove.getNext());
+			}
+			if(after != null) {
+				after.setPrev(toMove.getPrev());
+			}
+			
+			if(tail == toMove) {
+				tail = before;
+			}
+			
+			
+			toMove.setNext(null);
+			toMove.setPrev(null);
+			
+			this.enqueue(toMove);
+		}
 	}
 }
